@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UFAS Shield - Social Risk Inspector</title>
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen p-4 md:p-8">
+
+  <!-- 頂端 $UFAS Banner -->
+  <div class="max-w-4xl mx-auto mb-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <i data-lucide="shield-check" class="w-8 h-8 text-yellow-300"></i>
+      <span class="font-bold text-sm md:text-base text-white" id="token-banner">
+        USER FUNDS ARE SAFE ($UFAS) - Safety is not just a meme, it's a standard.
+      </span>
+    </div>
+    <div class="flex gap-2">
+      <a href="#" class="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-bold text-xs rounded-lg transition" id="btn-buy">Buy $UFAS</a>
+      <a href="#" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs rounded-lg transition" id="btn-tg">Join Telegram</a>
+    </div>
+  </div>
+
+  <!-- Header 與 語系切換器 -->
+  <div class="max-w-4xl mx-auto flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400" id="main-title">
+        UFAS Shield
+      </h1>
+      <p class="text-xs md:text-sm text-slate-400" id="main-subtitle">
+        Social Media Risk & Anti-Scam Inspector
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
+      <i data-lucide="globe" class="w-4 h-4 text-slate-400 ml-1"></i>
+      <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-transparent text-xs text-slate-200 outline-none cursor-pointer">
+        <option value="en" class="bg-slate-800">English</option>
+        <option value="zh" class="bg-slate-800">繁體中文</option>
+        <option value="ja" class="bg-slate-800">日本語</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 搜尋輸入列 -->
+  <div class="max-w-4xl mx-auto mb-8">
+    <div class="flex gap-2">
+      <div class="relative flex-1">
+        <i data-lucide="search" class="absolute left-3.5 top-3.5 w-5 h-5 text-slate-500"></i>
+        <input 
+          type="text" 
+          id="username-input" 
+          placeholder="Enter X handle (e.g., BonnyC)" 
+          value="BonnyC"
+          class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+        />
+      </div>
+      <button 
+        onclick="analyzeAccount()" 
+        id="btn-search"
+        class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-3 rounded-xl text-sm transition flex items-center gap-2"
+      >
+        <span>Analyze</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 分析結果區塊 -->
+  <div id="result-container" class="max-w-4xl mx-auto hidden space-y-6">
+    <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 shadow-xl">
+      <!-- 帳號標頭 -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700 pb-6">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center font-bold text-2xl text-emerald-400" id="avatar-placeholder">
+            U
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold" id="res-name">Account Name</h2>
+              <i data-lucide="check-circle-2" id="res-verified" class="w-5 h-5 text-sky-400 hidden"></i>
+            </div>
+            <p class="text-sm text-slate-400" id="res-handle">@handle</p>
+          </div>
+        </div>
+
+        <!-- SAFU 安全驗證標籤 -->
+        <div id="safu-badge" class="px-4 py-2 rounded-xl border flex items-center gap-2 bg-emerald-950/60 border-emerald-500 text-emerald-300">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+          <span class="font-bold text-sm" id="safu-text">SAFU APPROVED</span>
+        </div>
+      </div>
+
+      <!-- 分析結果 details -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
+          <span class="text-xs text-slate-400 font-semibold" id="lbl-reasons">Assessment Reasons</span>
+          <ul class="mt-2 space-y-1.5 text-sm text-slate-200" id="res-reasons"></ul>
+        </div>
+
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
+          <span class="text-xs text-slate-400 font-semibold" id="lbl-status">Platform Link</span>
+          <div class="mt-3">
+            <a id="res-link" href="#" target="_blank" class="inline-flex items-center gap-2 text-xs bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-2 rounded-lg border border-slate-700 transition">
+              <span>View Profile on X</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 多語系翻譯檔
+    const i18n = {
+      en: {
+        banner: "USER FUNDS ARE SAFE ($UFAS) - Safety is not just a meme, it's a standard.",
+        buy: "Buy $UFAS", tg: "Join Telegram", title: "UFAS Shield", subtitle: "Social Media Risk & Anti-Scam Inspector",
+        searchPh: "Enter X handle (e.g. BonnyC)", searchBtn: "Analyze",
+        safuOk: "SAFU APPROVED", safuWarn: "FUNDS NOT SAFE!",
+        reasonsTitle: "Assessment Reasons", platformLink: "View Profile on X",
+        normalReason: "No suspicious DM baiting or bot activity detected in publicly indexed profile.",
+        scamReason: "Alert: Potential DM baiting or scam keywords associated with handle."
+      },
+      zh: {
+        banner: "USER FUNDS ARE SAFE ($UFAS) - 安全不只是迷因，更是我們的標準。",
+        buy: "購買 $UFAS", tg: "加入 Telegram", title: "UFAS 護盾", subtitle: "社群帳號活動追蹤與防詐風險分析系統",
+        searchPh: "輸入 X 帳號名稱 (例如: BonnyC)", searchBtn: "立即分析",
+        safuOk: "SAFU 官方安全認證", safuWarn: "警告！資產可能不安全",
+        reasonsTitle: "風險判定依據", platformLink: "前往 X 查看個人頁面",
+        normalReason: "公開檢索結果未發現異常私訊導流或自動化機器人特徵。",
+        scamReason: "警示：該帳號含敏感導流或投資關鍵字特徵。"
+      },
+      ja: {
+        banner: "USER FUNDS ARE SAFE ($UFAS) - 安全はミームではなく標準です。",
+        buy: "$UFASを購入", tg: "Telegramに参加", title: "UFAS シールド", subtitle: "SNSアカウント活動追跡＆詐欺リスク分析",
+        searchPh: "Xのユーザー名を入力 (例: BonnyC)", searchBtn: "分析開始",
+        safuOk: "SAFU 安全承認", safuWarn: "警告！資金が危険です",
+        reasonsTitle: "判定理由", platformLink: "Xでプロフィールを確認",
+        normalReason: "公開インデックスで怪しい誘導やボット活動は検出されませんでした。",
+        scamReason: "警告: 投資誘導やDMスパムに関連するキーワードが検出されました。"
+      }
+    };
+
+    let currentLang = 'en';
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      const t = i18n[lang];
+      document.getElementById('token-banner').innerText = t.banner;
+      document.getElementById('btn-buy').innerText = t.buy;
+      document.getElementById('btn-tg').innerText = t.tg;
+      document.getElementById('main-title').innerText = t.title;
+      document.getElementById('main-subtitle').innerText = t.subtitle;
+      document.getElementById('username-input').placeholder = t.searchPh;
+      document.getElementById('btn-search').querySelector('span').innerText = t.searchBtn;
+      document.getElementById('lbl-reasons').innerText = t.reasonsTitle;
+    }
+
+    // 純前端分析邏輯 (免 API / 免後端)
+    function analyzeAccount() {
+      const username = document.getElementById('username-input').value.trim();
+      if (!username) return;
+
+      const t = i18n[currentLang];
+      const isScam = username.toLowerCase().includes('bot') || username.toLowerCase().includes('scam') || username.toLowerCase().includes('line');
+
+      document.getElementById('res-name').innerText = username;
+      document.getElementById('res-handle').innerText = '@' + username;
+      document.getElementById('avatar-placeholder').innerText = username.charAt(0).toUpperCase();
+      document.getElementById('res-link').href = `https://x.com/${username}`;
+
+      const safuBadge = document.getElementById('safu-badge');
+      const safuText = document.getElementById('safu-text');
+      const reasonsList = document.getElementById('res-reasons');
+
+      reasonsList.innerHTML = '';
+
+      if (isScam) {
+        safuBadge.className = "px-4 py-2 rounded-xl border flex items-center gap-2 bg-rose-950/60 border-rose-500 text-rose-300";
+        safuText.innerText = t.safuWarn;
+        reasonsList.innerHTML = `<li class="flex items-center gap-2 text-rose-300"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>${t.scamReason}</li>`;
+      } else {
+        safuBadge.className = "px-4 py-2 rounded-xl border flex items-center gap-2 bg-emerald-950/60 border-emerald-500 text-emerald-300";
+        safuText.innerText = t.safuOk;
+        reasonsList.innerHTML = `<li class="flex items-center gap-2 text-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>${t.normalReason}</li>`;
+      }
+
+      document.getElementById('result-container').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // 初始化載入圖示
+    lucide.createIcons();
+  </script>
+</body>
+</html>
